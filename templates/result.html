@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Resume Screening Dashboard</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, sans-serif;
+        }
+
+        body{
+            background:#0f172a;
+            color:white;
+            padding:40px;
+        }
+
+        .container{
+            width:85%;
+            margin:auto;
+        }
+
+        h1{
+            text-align:center;
+            margin-bottom:40px;
+            font-size:42px;
+            color:#60a5fa;
+        }
+
+        .card{
+            background:#1e293b;
+            padding:25px;
+            border-radius:15px;
+            margin-bottom:30px;
+            box-shadow:0px 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .top-candidate{
+            border:3px solid #22c55e;
+        }
+
+        .rank{
+            font-size:24px;
+            font-weight:bold;
+            color:#facc15;
+            margin-bottom:15px;
+        }
+
+        .filename{
+            font-size:28px;
+            margin-bottom:15px;
+            color:#e2e8f0;
+        }
+
+        .score{
+            font-size:34px;
+            font-weight:bold;
+            color:#4ade80;
+            margin-bottom:15px;
+        }
+
+        .recommendation{
+            font-size:22px;
+            font-weight:bold;
+            color:#facc15;
+            margin-bottom:20px;
+        }
+
+        .progress-container{
+            width:100%;
+            background:#334155;
+            border-radius:20px;
+            overflow:hidden;
+            height:35px;
+            margin-bottom:25px;
+        }
+
+        .progress-bar{
+            height:100%;
+            background:linear-gradient(to right,#22c55e,#16a34a);
+            text-align:center;
+            line-height:35px;
+            color:white;
+            font-weight:bold;
+        }
+
+        .section-title{
+            margin-top:20px;
+            margin-bottom:15px;
+            color:#60a5fa;
+            font-size:22px;
+        }
+
+        ul{
+            list-style:none;
+        }
+
+        li{
+            background:#334155;
+            padding:12px;
+            margin-bottom:10px;
+            border-radius:8px;
+        }
+
+        .skills-container{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:20px;
+        }
+
+        .chart-container{
+            background:#1e293b;
+            padding:25px;
+            border-radius:15px;
+            margin-bottom:40px;
+        }
+
+        canvas{
+            background:white;
+            border-radius:10px;
+            padding:10px;
+        }
+
+        @media(max-width:768px){
+
+            .container{
+                width:95%;
+            }
+
+            .skills-container{
+                grid-template-columns:1fr;
+            }
+
+            h1{
+                font-size:30px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>AI Resume Screening Dashboard</h1>
+
+        <!-- CHART -->
+        <div class="chart-container">
+
+            <canvas id="myChart"></canvas>
+
+        </div>
+
+        <!-- RESULTS -->
+        {% for result in results %}
+
+            <div class="card {% if loop.index == 1 %}top-candidate{% endif %}">
+
+                <div class="rank">
+
+                    Rank #{{ loop.index }}
+
+                </div>
+
+                <div class="filename">
+
+                    {{ result.filename }}
+
+                </div>
+
+                <div class="score">
+
+                    {{ result.score }}% Match
+
+                </div>
+
+                <div class="recommendation">
+
+                    {{ result.recommendation }}
+
+                </div>
+
+                <div class="progress-container">
+
+                    <div
+                        class="progress-bar"
+                        style="width: {{ result.score }}%;"
+                    >
+
+                        {{ result.score }}%
+
+                    </div>
+
+                </div>
+
+                <div class="skills-container">
+
+                    <!-- MATCHED SKILLS -->
+                    <div>
+
+                        <div class="section-title">
+
+                            Matched Skills
+
+                        </div>
+
+                        <ul>
+
+                            {% for skill in result.matched_skills %}
+
+                                <li>{{ skill }}</li>
+
+                            {% endfor %}
+
+                        </ul>
+
+                    </div>
+
+                    <!-- MISSING SKILLS -->
+                    <div>
+
+                        <div class="section-title">
+
+                            Missing Skills
+
+                        </div>
+
+                        <ul>
+
+                            {% for skill in result.missing_skills %}
+
+                                <li>{{ skill }}</li>
+
+                            {% endfor %}
+
+                        </ul>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+    <!-- CHART JS -->
+    <script>
+
+        const labels = [
+            {% for result in results %}
+                "{{ result.filename }}",
+            {% endfor %}
+        ];
+
+        const scores = [
+            {% for result in results %}
+                {{ result.score }},
+            {% endfor %}
+        ];
+
+        const ctx = document.getElementById('myChart');
+
+        new Chart(ctx, {
+
+            type: 'bar',
+
+            data: {
+
+                labels: labels,
+
+                datasets: [{
+
+                    label: 'Resume Match Percentage',
+
+                    data: scores,
+
+                    borderWidth: 1
+
+                }]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                scales: {
+
+                    y: {
+
+                        beginAtZero: true,
+                        max: 100
+
+                    }
+
+                }
+
+            }
+
+        });
+
+    </script>
+
+</body>
+
+</html>
